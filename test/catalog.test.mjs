@@ -7,11 +7,11 @@ import { createValidator, generateCatalog, readEntry, ROOT, screenshotUrl, workb
 
 const fixture = path.join(ROOT, 'test/fixtures/valid/owner__repo.yml')
 
-test('minimal example is the production protocol, with the declared runtime ID', async () => {
+test('minimal example derives compatibility ID from repository identity', async () => {
   const record = await readEntry(fixture, await createValidator())
   const example = await readEntry(path.join(ROOT, 'examples/workbench.yml'), await createValidator(), { example: true })
   assert.deepEqual(record, example)
-  assert.deepEqual(Object.keys(record.entry), ['url', 'workbenchId', 'name', 'category', 'description', 'screenshots'])
+  assert.deepEqual(Object.keys(record.entry), ['url', 'name', 'category', 'description', 'screenshots'])
   const catalog = generateCatalog([record], [])
   assert.equal(catalog.workbenches[0].name, record.entry.name)
   assert.equal(catalog.workbenches[0].id, 'owner/repo')
@@ -57,11 +57,18 @@ test('catalog uniqueness key derives from GitHub owner/repository, sorted determ
   assert.deepEqual(generateCatalog([make('zeta'), make('alpha')], []), generateCatalog([make('alpha'), make('zeta')], []))
 })
 
-test('requires a stable runtime workbench ID', async () => {
+test('optional legacy workbench ID must match the derived identity', async (t) => {
   const validate = await createValidator()
   const { entry } = await readEntry(fixture, validate)
-  for (const workbenchId of [undefined, '', 'Not Valid', 'owner/repository']) assert.equal(validate({ ...entry, workbenchId }), false)
-  assert.equal(validate({ ...entry, workbenchId: workbenchIdFor('project-helper', 'two') }), true)
+  assert.equal(validate(entry), true)
+  for (const workbenchId of ['', 'Not Valid', 'owner/repository']) assert.equal(validate({ ...entry, workbenchId }), false)
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'dsh-legacy-id-'))
+  t.after(() => fs.rm(directory, { recursive: true, force: true }))
+  const file = path.join(directory, 'owner__repo.yml')
+  await fs.writeFile(file, JSON.stringify({ ...entry, workbenchId: 'wb-other-repo' }))
+  await assert.rejects(() => readEntry(file, validate), /workbenchId 必须/)
+  await fs.writeFile(file, JSON.stringify({ ...entry, workbenchId: workbenchIdFor('owner', 'repo') }))
+  await readEntry(file, validate)
 })
 
 test('derives runtime IDs directly from the repository identity', () => {

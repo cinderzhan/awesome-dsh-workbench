@@ -6,7 +6,6 @@
   "additionalProperties": false,
   "required": [
     "url",
-    "workbenchId",
     "name",
     "category",
     "description",

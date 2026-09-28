@@ -3,7 +3,7 @@ import path from 'node:path'
 import Ajv2020 from 'ajv/dist/2020.js'
 import addFormats from 'ajv-formats'
 import semver from 'semver'
-import { ROOT, generateCatalog, screenshotUrl } from './catalog-lib.mjs'
+import { ROOT, generateCatalog, screenshotUrl, workbenchIdFor } from './catalog-lib.mjs'
 
 export async function createPublishedValidator() {
   const ajv = new Ajv2020({ allErrors: true, strict: true })
@@ -19,7 +19,7 @@ export async function validatePublishedCatalog(catalog) {
   const workbenchIds = new Set()
   for (const item of catalog.workbenches) {
     const id = `${item.owner}/${item.repository}`.toLowerCase()
-    if (item.id !== id || item.url.toLowerCase() !== `https://github.com/${id}` || ids.has(id) || workbenchIds.has(item.workbenchId)) throw new Error('发布目录仓库或工作台身份不一致或重复')
+    if (item.id !== id || item.url.toLowerCase() !== `https://github.com/${id}` || ids.has(id) || item.workbenchId !== workbenchIdFor(item.owner, item.repository) || workbenchIds.has(item.workbenchId)) throw new Error('发布目录仓库或工作台身份不一致或重复')
     ids.add(id)
     workbenchIds.add(item.workbenchId)
     const install = item.distribution

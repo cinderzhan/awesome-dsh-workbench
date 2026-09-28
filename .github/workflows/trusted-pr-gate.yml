@@ -1,18 +1,17 @@
 name: Trusted catalog PR gate
 
 on:
-  workflow_run:
-    workflows: [Catalog candidate]
-    types: [completed]
+  pull_request_target:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   contents: read
   pull-requests: read
-  checks: write
 
 jobs:
   gate:
-    if: ${{ github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success' }}
+    name: Trusted catalog probe
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -26,10 +25,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --ignore-scripts
-      - name: Read and probe candidate YAML without executing PR code
-        id: gate
+      - name: Probe candidate YAML through read-only API
         env:
           GITHUB_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
-          CANDIDATE_SHA: ${{ github.event.workflow_run.head_sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          CANDIDATE_SHA: ${{ github.event.pull_request.head.sha }}
         run: node scripts/trusted-pr-gate.mjs
