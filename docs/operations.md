@@ -4,7 +4,7 @@
 
 仓库管理员在启用目录发布时完成以下配置：
 
-1. 在 main 配置分支保护或 ruleset：必须通过 PR；至少一名维护者批准；新提交撤销旧审批；要求分支更新至最新 main。启用 `validate`（Catalog CI）和 `Trusted catalog probe` 必需检查，尽可能将检查来源限制为 GitHub Actions；禁止强推和删除 main。
+1. 在 main 配置分支保护或 ruleset：必须通过 PR；至少一名维护者批准；新提交撤销旧审批；要求分支更新至最新 main。启用 `validate`（Catalog CI）和 `Trusted catalog probe`（Trusted catalog PR gate 中的作业）必需检查，尽可能将检查来源限制为 GitHub Actions；禁止强推和删除 main。
 2. 等检查在工作流上实际运行后，再将对应检查设为 required。
 3. 在 Settings → Pages 将 Build and deployment 的 Source 设为 GitHub Actions，并按需配置 `github-pages` 环境规则。仓库为 Public 时 Pages 和标准 Actions runner 可免费使用。
 4. 手动运行 Publish workbench index，核对 Pages 返回地址下的 `/index.json`。该文件由 runner 从 `data/workbenches/*.yml` 生成，不提交到仓库。
@@ -17,7 +17,7 @@
 | 工作流 | 触发及作用 |
 | --- | --- |
 | Catalog CI | 所有 PR 和 main push：离线 Schema/example、测试和投稿范围 |
-| Catalog candidate → Trusted catalog PR gate | PR 触发无密钥排队，可信 main 脚本通过 API 读取固定 head，检查投稿来源并回写结果 |
+| Trusted catalog PR gate | `pull_request_target` 为每个 PR 触发可信 main 作业；通过 API 从作者 fork 只读 YAML，检查来源和截图，作业结论直接作为必需检查 |
 | Publish workbench index | main push / 手动：完整探测及索引 Schema 校验，生成 `data/index.json`，上传 `data/` 并部署 Pages |
 | 同一构建的每日 schedule | 重新解析 npm → Release → 源码并检查截图，全部成功后刷新 Pages 索引 |
 
@@ -27,7 +27,7 @@
 
 ## 失败与回滚
 
-- PR 网络限流：可信检查标为失败并说明未完成，重跑 Catalog candidate，不能以 neutral 当作通过。
+- PR 网络限流：可信检查标为失败并说明未完成，重跑 Trusted catalog PR gate，不能以 neutral 当作通过。
 - 构建失败：查日志，修复原因后重跑；不要手工编辑生成 JSON。
 - 回滚：在 main 通过 PR 回退对应条目或构建逻辑，再重新运行发布工作流。索引仍会重新解析 npm latest、Release latest 和默认分支，因此目录回退不等于安装版本回滚。
 

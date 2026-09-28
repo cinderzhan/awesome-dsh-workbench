@@ -71,7 +71,7 @@ export async function readEntry(file, validate, { example = false } = {}) {
   if (!validate(entry)) throw new Error(`${relative} 不符合 schema：${formatAjvErrors(validate.errors)}`)
 
   const { owner, repository } = repositoryParts(entry.url)
-  if (entry.workbenchId !== workbenchIdFor(owner, repository)) throw new Error(`${relative} 的 workbenchId 必须为 wb-<owner>-<repo>`)
+  if (entry.workbenchId !== undefined && entry.workbenchId !== workbenchIdFor(owner, repository)) throw new Error(`${relative} 的 workbenchId 必须为 wb-<owner>-<repo>`)
   if (repository.toLowerCase().endsWith('.git')) throw new Error(`${relative} 的 url 请使用仓库主页，不要以 .git 结尾`)
   const expected = `${owner}__${repository}.yml`.toLowerCase()
   if (!example && path.basename(file).toLowerCase() !== expected) {
@@ -100,9 +100,10 @@ export async function loadEntries({ directory = DATA_DIR } = {}) {
   for (const { owner, repository, entry } of records) {
     const id = `${owner}/${repository}`.toLowerCase()
     if (ids.has(id)) throw new Error(`仓库重复：${id}`)
-    if (workbenchIds.has(entry.workbenchId)) throw new Error(`工作台 ID 重复：${entry.workbenchId}`)
+    const workbenchId = workbenchIdFor(owner, repository)
+    if (workbenchIds.has(workbenchId)) throw new Error(`工作台 ID 重复：${workbenchId}`)
     ids.add(id)
-    workbenchIds.add(entry.workbenchId)
+    workbenchIds.add(workbenchId)
   }
   return records
 }
@@ -115,7 +116,7 @@ export function generateCatalog(records, categories) {
     workbenches: records
       .map(({ entry, owner, repository }) => ({
         id: `${owner}/${repository}`.toLowerCase(),
-        workbenchId: entry.workbenchId,
+        workbenchId: workbenchIdFor(owner, repository),
         ...(entry.legacyWorkbenchIds ? { legacyWorkbenchIds: entry.legacyWorkbenchIds } : {}),
         owner,
         repository,
