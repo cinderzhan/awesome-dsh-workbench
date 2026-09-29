@@ -1,0 +1,9 @@
+url: https://github.com/gjz18342624299-arch/dsh-huaxue-workbench
+name: 花少2 · 花学工作台
+category: other
+description:
+  zh: 七位花学旅伴陪你工作、聊天与借个嘴：在原生会话中按角色聊天、同会话切换旅伴，并提供「第八位嘉宾」情境续演游戏。
+  en: Seven Huaxue travel-companion personas for role-play chat in native DSH sessions, with same-session persona switching and an "Eighth Guest" scenario continuation game.
+screenshots:
+  - https://raw.githubusercontent.com/gjz18342624299-arch/dsh-huaxue-workbench/775e75cd15891417ca23ee42b85e66ea51325c37/docs/screenshots/member-picker.jpg
+  - https://raw.githubusercontent.com/gjz18342624299-arch/dsh-huaxue-workbench/775e75cd15891417ca23ee42b85e66ea51325c37/docs/screenshots/eighth-guest-game.jpg
