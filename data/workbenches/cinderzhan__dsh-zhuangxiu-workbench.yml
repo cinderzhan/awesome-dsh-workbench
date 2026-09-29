@@ -1,0 +1,9 @@
+url: https://github.com/cinderzhan/dsh-zhuangxiu-workbench
+name: 装修工作台
+category: productivity
+description:
+  zh: 在本机管理装修施工进度、统一待办、预算明细与灵感图片，支持 JSON/CSV 备份和按需展开 DSH 原生对话。
+  en: Manage renovation progress, shared tasks, budget details and inspiration images locally, with JSON/CSV backups and optional native DSH chat.
+screenshots:
+  - https://raw.githubusercontent.com/cinderzhan/dsh-zhuangxiu-workbench/main/docs/images/overview.jpg
+tarball: https://github.com/cinderzhan/dsh-zhuangxiu-workbench/releases/download/v0.3.1/dsh-zhuangxiu-workbench-0.3.1.tgz
