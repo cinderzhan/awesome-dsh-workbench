@@ -1,4 +1,5 @@
 url: https://github.com/dataelement/dsh-site-selection
+tarball: https://github.com/dataelement/dsh-site-selection/releases/latest/download/dsh-site-selection.tgz
 workbenchId: wb-dataelement-dsh-site-selection
 legacyWorkbenchIds:
   - site-selection
