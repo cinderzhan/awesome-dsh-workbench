@@ -1,0 +1,13 @@
+url: https://github.com/gjz18342624299-arch/dsh-report-learning-workbench
+tarball: https://github.com/gjz18342624299-arch/dsh-report-learning-workbench/releases/latest/download/dsh-report-learning-workbench.tgz
+name: 报告学习工作台
+category: content
+description:
+  zh: 上传标准答案与背景材料，AI 自动完成"练习 → 批改 → 记错题"训练循环，最后 A/B 考试对比"有记忆 vs 无记忆"的差距；适合投研报告、尽调报告等长文写作的持续调优。
+  en: Upload gold-standard answers and background materials; the workbench runs a practice-grade-remember training loop and finishes with an A/B exam comparing with-memory vs. without-memory writing; suited for iteratively tuning long-form reports such as investment research and due diligence.
+screenshots:
+  - https://raw.githubusercontent.com/gjz18342624299-arch/dsh-report-learning-workbench/main/docs/images/experiment-training.png
+  - https://raw.githubusercontent.com/gjz18342624299-arch/dsh-report-learning-workbench/main/docs/images/wizard-checklist.png
+  - https://raw.githubusercontent.com/gjz18342624299-arch/dsh-report-learning-workbench/main/docs/images/exam-comparison.png
+  - https://raw.githubusercontent.com/gjz18342624299-arch/dsh-report-learning-workbench/main/docs/images/round-scoring.png
+  - https://raw.githubusercontent.com/gjz18342624299-arch/dsh-report-learning-workbench/main/docs/images/self-check.png
