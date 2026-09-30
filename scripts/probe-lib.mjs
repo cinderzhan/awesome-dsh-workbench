@@ -151,6 +151,19 @@ function sourceFileUrl(owner, repository, commit, file) {
   return `https://raw.githubusercontent.com/${owner}/${repository}/${commit}/${file.split('/').map(encodeURIComponent).join('/')}`
 }
 
+function normalizeCommitDate(value) {
+  if (typeof value !== 'string') return null
+  const parts = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d{1,3})?(Z|[+-]\d{2}:\d{2})$/.exec(value)
+  if (!parts) return null
+  const [, year, month, day, hour, minute, second, zone] = parts
+  const offsetHours = zone === 'Z' ? 0 : Number(zone.slice(1, 3))
+  const offsetMinutes = zone === 'Z' ? 0 : Number(zone.slice(4, 6))
+  if (+month < 1 || +month > 12 || +day < 1 || +day > new Date(Date.UTC(+year, +month, 0)).getUTCDate()
+    || +hour > 23 || +minute > 59 || +second > 59 || offsetHours > 23 || offsetMinutes > 59) return null
+  const parsed = new Date(value)
+  return Number.isFinite(parsed.getTime()) ? parsed.toISOString() : null
+}
+
 export async function probeEntry(record, { fetchImpl = fetch } = {}) {
   const originalFetch = fetchImpl
   fetchImpl = (url, options = {}) => originalFetch(url, { ...options, signal: AbortSignal.timeout(30_000) })
@@ -184,6 +197,7 @@ export async function probeEntry(record, { fetchImpl = fetch } = {}) {
     distribution,
     screenshots,
     sourceCommit: commit.sha,
+    updatedAt: normalizeCommitDate(commit.commit?.committer?.date),
     license: repo.license.spdx_id,
     probe: { status: 'ok' }
   }

@@ -107,6 +107,10 @@
             "minLength": 1,
             "pattern": "^[a-f0-9]{40}$"
           },
+          "updatedAt": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          },
           "license": {
             "type": "string",
             "minLength": 1

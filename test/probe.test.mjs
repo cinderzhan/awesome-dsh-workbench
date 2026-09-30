@@ -36,12 +36,12 @@ async function archive({ version = '1.2.3', name = pkg.name, repository = pkg.re
   } finally { await fs.rm(directory, { recursive: true, force: true }) }
 }
 
-function fixture({ bytes, npm = false, repo = {}, packageValue = pkg, npmRepository = pkg.repository, releaseAssets } = {}) {
+function fixture({ bytes, npm = false, repo = {}, commitResponse = {}, packageValue = pkg, npmRepository = pkg.repository, releaseAssets } = {}) {
   const calls = []
   const fetchImpl = async (url) => {
     calls.push(url)
     if (url === 'https://api.github.com/repos/owner/repo') return json({ full_name: 'owner/repo', name: 'repo', description: 'GitHub About description', private: false, archived: false, default_branch: 'main', license: { spdx_id: 'MIT' }, ...repo })
-    if (url.endsWith('/commits/main')) return json({ sha: 'a'.repeat(40) })
+    if (url.endsWith('/commits/main')) return json({ sha: 'a'.repeat(40), commit: { committer: { date: '2026-09-29T10:20:30Z' } }, ...commitResponse })
     if (url.endsWith('/package.json')) return json(packageValue)
     if (url.endsWith('/client.js') || url.endsWith('/cordis.patch.yml')) return new Response('source')
     if (url.endsWith('/main.png')) return new Response(await sharp({ create: { width: 2, height: 2, channels: 3, background: 'white' } }).png().toBuffer())
@@ -82,8 +82,18 @@ test('falls back to pinned source when neither npm nor Release is available', as
   assert.equal(result.distribution.type, 'github-source')
   assert.equal(result.distribution.commit, 'a'.repeat(40))
   assert.equal(result.version, pkg.version)
+  assert.equal(result.updatedAt, '2026-09-29T10:20:30.000Z')
   assert.ok(mock.calls.some((url) => url.includes(`/a${'a'.repeat(39)}/./client.js`)))
   assert.equal(result.screenshots[0].url, record().entry.screenshots[0])
+})
+
+test('update time is the default-branch commit date, normalized to UTC, or explicitly unavailable', async () => {
+  const offset = await probeEntry(record(), fixture({ commitResponse: { commit: { committer: { date: '2026-09-29T18:20:30+08:00' } } } }))
+  assert.equal(offset.updatedAt, '2026-09-29T10:20:30.000Z')
+  for (const date of [undefined, 'not-a-date', '2026-02-30T10:20:30Z', '2026-09-29T25:20:30Z']) {
+    const result = await probeEntry(record(), fixture({ commitResponse: { commit: { committer: { date } } } }))
+    assert.equal(result.updatedAt, null)
+  }
 })
 
 test('npm ownership mismatch falls back, while source package ownership must match', async () => {
@@ -191,8 +201,18 @@ test('published contract accepts every actual installation variant and rejects d
     const generated = await probeEntry(candidate, mock)
     const catalog = await buildPublishedCatalog([{ record: candidate, generated }], [])
     assert.equal(catalog.kind, 'catalog')
+    assert.equal(catalog.workbenches[0].updatedAt, '2026-09-29T10:20:30.000Z')
     await enrichMetrics(catalog, { sleep: async () => {}, warn: () => {}, fetchImpl: async () => { throw new Error('offline') } })
     await validatePublishedCatalog(catalog)
+    const missingUpdate = structuredClone(catalog)
+    delete missingUpdate.workbenches[0].updatedAt
+    await validatePublishedCatalog(missingUpdate)
+    const unavailableUpdate = structuredClone(catalog)
+    unavailableUpdate.workbenches[0].updatedAt = null
+    await validatePublishedCatalog(unavailableUpdate)
+    const invalidUpdate = structuredClone(catalog)
+    invalidUpdate.workbenches[0].updatedAt = 'yesterday'
+    await assert.rejects(() => validatePublishedCatalog(invalidUpdate), /协议/)
     catalog.workbenches[0].metrics.githubStars = { value: 0, checkedAt: '2026-09-21T00:00:00Z', status: 'ok' }
     catalog.workbenches[0].metrics.npmDownloads30d = { value: 4, checkedAt: '2026-09-21T00:00:00Z', status: 'stale', start: '2026-08-22', end: '2026-09-20' }
     catalog.workbenches[0].metrics.githubReleaseDownloads = { value: 9, checkedAt: '2026-09-21T00:00:00Z', status: 'ok' }

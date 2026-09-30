@@ -73,7 +73,7 @@ screenshots:
 
 ## 客户端索引
 
-`npm run probe` 解析安装优先级并校验，在 runner 的 `data/index.json` 生成客户端索引，输出 `distribution`、实际版本、源码 commit、兼容 `workbenchId`、图片 URL、校验值及探测状态。不要把这些生成字段抄回 YAML。
+`npm run probe` 解析安装优先级并校验，在 runner 的 `data/index.json` 生成客户端索引，输出 `distribution`、实际版本、源码 commit、`updatedAt`、兼容 `workbenchId`、图片 URL、校验值及探测状态。`updatedAt` 是默认分支最新 commit 的提交者时间，规范化为 UTC ISO 时间；GitHub 未返回有效时间时为 `null`。旧版索引可缺少该字段。它与统计采集时间 `metrics.*.checkedAt` 不同，也不表示 npm 或 Release 的发布时间。不要把这些生成字段抄回 YAML。
 
 `data/index.json` 不提交；GitHub Actions 将整个 `data/` 目录上传为 Pages artifact，因此发布后索引位于站点根路径 `/index.json`。全部探测通过后才替换 Pages 部署。首次收录经过人工审核，后续发版由作者负责并自动探测；这不意味着每个后续版本经过人工审核或安全审计。
 
