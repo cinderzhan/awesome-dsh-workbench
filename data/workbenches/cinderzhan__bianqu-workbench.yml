@@ -1,8 +1,0 @@
-url: https://github.com/cinderzhan/bianqu-workbench
-name: 编曲工作台
-category: content
-description:
-  zh: 随手记录旋律动机、和声走向与歌词片段的编曲灵感库，支持搜索、类型与标签筛选和归档，需要时可打开 AI 对话继续创作。
-  en: An idea library for music arrangers to capture melody motifs, chord progressions and lyric snippets, with search, type and tag filters, archiving, and an on-demand AI conversation.
-screenshots:
-  - https://raw.githubusercontent.com/cinderzhan/bianqu-workbench/main/docs/images/overview.webp
